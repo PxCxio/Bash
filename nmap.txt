@@ -1,0 +1,28 @@
+
+
+
+sudo nmap -f $TIP // scans sending 8 bytes
+sudo nmap mvu 8(16/24/32/40) $TIP scans using the specified unit
+sudo nmap -D RND:10 $TIP
+#decoy
+nmap -D $Decoy1, $Decoy2 $RND:10 
+sudo nmap -sI $ZombieIP $TIP
+
+nmap --source-port $prtNum54 $TIP
+
+#adds random data to prove data -size=bytes
+nmap --data-length 25 $TIP
+
+nmap --randomize-hosts $TIP.$.$.100-175
+
+#tells nMap to generate a random mac address 
+nmap -sT -PN --spoof-mac 0 $TIP
+
+#send badchecksums
+#TCP IP uses checksums if it looks like the normal thing it is substacially correctly set up
+
+nmap --badsum $TIP
+
+
+
+

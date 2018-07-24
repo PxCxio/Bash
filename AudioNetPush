@@ -1,0 +1,25 @@
+Did you know you could stream audio or video on linux without any configuration? Note that this is a push model. So we have to start the streaming client first. This is what you have to do. On the streaming client, setup the listener.
+
+$ nc -l -p 1234 | mplayer -cache 8192 -
+
+This will wait for media from the network to play.
+On the streaming server, push the media data (any mplayer playable file) thusly.
+
+$ cat video.mpg | nc <ip/dns of streaming client> 1234
+
+
+
+I just did a successfull netcat trial using netcat and sox:
+
+On the receiving machine, I used an infinite loop:
+
+$ while true; do nc -l 1234 | sox -t mp3 - -t ossdsp /dev/dsp; sleep 1; done
+
+On the sending machine I sent an mp3 file:
+
+$ cat ./00.mp3 | nc 10.18.22.250 1234
+
+
+Bingo! Got the sound to play!
+
+

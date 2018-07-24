@@ -1,0 +1,51 @@
+serve files by a web iterface
+python -m SimpleHTTPServer [port]
+python3 -m HTTP.server [port]
+
+
+port 80 [priviledged port <1024
+
+local app that doesnt exist in the server
+
+mount remote directory
+
+update website over SSH
+
+mkdir web/files 
+sshfs www.example.com:/home/jason/public_html
+bluefish web/files\ index.html
+fusermount -u web/files
+
+
+user@host format
+
+if no directory specified after the colon home directory is assumed
+
+ifconfig.me
+
+curl ifconfig.me
+
+
+ssh remote host without password
+
+ssh key pair
+
+home/.ssh/authorize_keys
+
+ssh-copy-id
+
+generate key without pass
+just press enter
+
+ssh-keygen
+askfile
+
+lsof
+
+lsof 
+-n stops translation from ip to host 
+-i displays network connection
+
+
+
+
