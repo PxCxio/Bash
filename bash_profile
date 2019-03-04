@@ -1,8 +1,3 @@
-source ~/.profile
-
-#Nathaniel Landau Bash Profile with some added aliases and a shell prompt cheatsheet
-#original reference: https://natelandau.com/my-mac-osx-bash_profile/
-
 #
 # shell prompt variables cheatsheet
 #
@@ -46,7 +41,8 @@ alias ls='ls -GFh'
     export PATH="$PATH:/usr/local/bin/"
     export PATH="/usr/local/git/bin:/sw/bin/:/usr/local/bin:/usr/local/:/usr/local/sbin:/usr/local/mysql/bin:$PATH"
     export PATH="/usr/local/opt/openssl/bin:$PATH"
-
+    export PATH="$PATH:~/bin/"
+    export PATH="$PATH:/Users/punk_rockguy/Documents/Coding/Flutter/flutter/bin"
 #   Set Default Editor (change 'Nano' to the editor of your choice)
 #   ------------------------------------------------------------
     export EDITOR=/usr/bin/vim
@@ -55,10 +51,218 @@ alias ls='ls -GFh'
 #   2. MAKE TERMINAL BETTER
 #   -----------------------------
 
-enc () { openssl enc -aes-256-cbc -salt -in $1 -out $2;} #Encrypt 
-dec () { openssl enc -d -aes-256-cbc -in $1 -out $2; } #Decrypt 
+###############Encryption Source###################
+
+enc () { openssl enc -aes-256-cbc -salt -in "$1" -out "$2";} #Encrypt 
+dec () { openssl enc -d -aes-256-cbc -in "$1" -out "$2"; } #Decrypt 
+
+################################Editing Source#############3
+
+swiff () { cp "$1" "$1.swiff" && vi -c 'wq' -r "$1"; mv "$1" "$1.xswiff" && mv "$1.swiff" "$1" && diff "$1" "$1.xswiff"; rm "$1.xswiff" ; } #swapdiff
+vswiff () { cp "$1" "$1.swdiff" && vi -c 'wq' -r "$1"; mv "$1" "$1.xswdiff" && mv "$1.swdiff" "$1" && vimdiff "$1" "$1.xswdiff" && rm $1".xswdiff"; } #swapvimdiff
+
+#############VMware Virtualization Source############################
+#Could Be shortened to an externa VMWare File
+
+wvm-start () {
+VM=$1
+vmPath="$(find ~/Documents -maxdepth "9" -iname "*$VM*.vmx" 2> >(grep -v 'Permission denied' >&2))"
+vmrun -T ws start "$vmPath" nogui;
+}
+
+wvm-stop () {
+VM=$1
+vmPath="$(find ~/Documents -maxdepth "9" -iname "*$VM*.vmx" 2> >(grep -v 'Permission denied' >&2))"
+vmrun -T ws stop "$vmPath" soft;
+}
+
+wvm-reset () {
+VM=$1
+vmPath="$(find ~/Documents -maxdepth "9" -iname "*$VM*.vmx" 2> >(grep -v 'Permission denied' >&2))"
+vmrun -T ws reset "$vmPath" soft;
+}
+
+wvm-suspend () {
+VM=$1
+vmPath="$(find ~/Documents -maxdepth "9" -iname "*$VM*.vmx" 2> >(grep -v 'Permission denied' >&2))"
+vmrun -T ws suspend "$vmPath" soft;
+}
+
+wvm-pause () {
+VM=$1
+vmPath="$(find ~/Documents -maxdepth "9" -iname "*$VM*.vmx" 2> >(grep -v 'Permission denied' >&2))"
+vmrun -T ws pause "$vmPath" soft;
+}
+
+wvm-unpause () {
+VM=$1
+vmPath="$(find ~/Documents -maxdepth "9" -iname "*$VM*.vmx" 2> >(grep -v 'Permission denied' >&2))"
+vmrun -T ws unpause "$vmPath" soft;
+}
+
+wvm-run () {
+#takes 2 arguments gu & pwdPath
+VM=$1
+vmPath="$(find ~/Documents -maxdepth "9" -iname "*$VM*.vmx" 2> >(grep -v 'Permission denied' >&2))"
+gu=$2
+gp="$(gpg --decrypt $pwdPath)"
+echo "$vmPath"
+#pwdPath=$3
+pwdPath="$HOME/.gnupg/.xvm/"$VM"/"$VM"Xy.gpg"
+cmd=$3
+
+#check for tools
+chkTools="`vmrun checkToolsState "$vmPath"`" 
+echo $chkTools
+if [ "!$chkTools" = "running" ]
+then
+echo "VMTools Havent been installed. Installing..."
+vmrun installTools "$vmPath"
+
+fi
+
+vmrun -T ws -gu "$gu" -gp "$gp" runProgramInGuest "$vmPath" -activeWindow /bin/bash "$cmd"  ;
+
+gIP="`vmrun -T ws getGuestIPAddress "$vmPath"`"
+echo "IP is: $gIP " 
+
+#############
+
+#VM="/Users/punk_rockguy/Documents/Virtual Machines.localized/Dbxiatan.vmwarevm/Dbxiatan.vmx"
+#pwdPath="$HOME/.gnupg/.xvm/"$VM"/"$VM"Xy.gpg"
+#hIP="`ifconfig | grep "inet " | grep -v 127.0.0.1 | cut -d\  -f2 | head -n 1`"
+#pwdX="$(gpg --decrypt $pwdPath)"
+#FILE="$HOME/.ssh/($VM)Xy"
+#if[ ! -f FILE ] ssh-keygen -f ($VM)Xy -t ecdsa -b 521 & ssh-copy-id -i ~/.ssh/($VM)Xy $user@$host
+#vmrun -T ws -gu Dbxiatan -gp $pwdX start "$VM" nogui & sleep 5;
+ 
+#ssh -Y xyryu@$gIP "terminology -e ssh punk_rockguy@$hIP"  
+}
+
+wvm-gls () {
+#takes 2 arguments gu & pwdPath
+VM=$1
+vmPath="$(find ~/Documents -maxdepth "9" -iname "*$VM*.vmx" 2> >(grep -v 'Permission denied' >&2))"
+gu=$2
+pwdPath=$3
+cmd=$4
+gp="$(gpg --decrypt $pwdPath)"
+
+vmrun -T ws -gu $gu -gp $gp listProcessesInGuest "$vmPath";
+}
+
+wvm-create () {
+vmware-vdiskmanager
+}
+
+DbxTerm (){
+pwdPath="$HOME/DbxiXy.gpg"
+VM="/Users/punk_rockguy/Documents/Virtual Machines.localized/Dbxiatan.vmwarevm/Dbxiatan.vmx"
+hIP="$(ifconfig | grep "inet " | grep -v 127.0.0.1 | cut -d\  -f2 | head -n 1)"
+pwdX="$(gpg --decrypt $pwdPath)"
+#FILE="$HOME/.ssh/($VM)Xy"
+#if[ ! -f FILE ] ssh-keygen -f ($VM)Xy -t ecdsa -b 521 & ssh-copy-id -i ~/.ssh/($VM)Xy $user@$host
+vmrun -T ws -gu Dbxiatan -gp $pwdX start "$VM" nogui;
+gIP="$(vmrun -T ws getGuestIPAddress "$VM")"
+echo "IP is: $gIP " 
+ 
+ssh -Y xyryu@$gIP terminology & 
+#password_command = gpg --decrypt $pwdPath.enc
+}
+
+wvm-getip (){
+VM="$1"
+
+pwdPath="$HOME/.gnupg/.mxy/"$VM"Xy.gpg"
+hIP="$(ifconfig | grep "inet " | grep -v 127.0.0.1 | cut -d\  -f2 | head -n 1)"
+pwdX="$(gpg --decrypt $pwdPath)"
+#FILE="$HOME/.ssh/($VM)Xy"
+#if[ ! -f FILE ] ssh-keygen -f ($VM)Xy -t ecdsa -b 521 & ssh-copy-id -i ~/.ssh/($VM)Xy $user@$host
+gIP="$(vmrun -T ws getGuestIPAddress "$VM")"
+echo "IP is: $gIP " 
+ 
+#password_command = gpg --decrypt $pwdPath.enc
+}
+
+terminology (){
+pwdPath="$HOME/DbxiXy.gpg"
+VM="/Users/punk_rockguy/Documents/Virtual Machines.localized/Dbxiatan.vmwarevm/Dbxiatan.vmx"
+hIP="`ifconfig | grep "inet " | grep -v 127.0.0.1 | cut -d\  -f2 | head -n 1`"
+pwdX="$(gpg --decrypt $pwdPath)"
+#FILE="$HOME/.ssh/($VM)Xy"
+#if[ ! -f FILE ] ssh-keygen -f ($VM)Xy -t ecdsa -b 521 & ssh-copy-id -i ~/.ssh/($VM)Xy $user@$host
+vmrun -T ws -gu Dbxiatan -gp $pwdX start "$VM" nogui & sleep 5;
+gIP="`vmrun -T ws getGuestIPAddress "$VM"`"
+echo "IP is: $gIP " 
+ 
+ssh -Y xyryu@$gIP "terminology -e ssh punk_rockguy@$hIP"  
+#password_command = gpg --decrypt $pwdPath.enc
+}
+
+##########################Image Manipulation
+smartresize() {
+   mogrify -path "$3" -filter Triangle -define filter:support=2 -thumbnail "$2" -unsharp 0.25x0.08+8.3+0.045 -dither None -posterize 136 -quality 82 -define jpeg:fancy-upsampling=off -define png:compression-filter=5 -define png:compression-level=9 -define png:compression-strategy=1 -define png:exclude-chunk=all -interlace none -colorspace sRGB "$1"
+}
+
+mv_seqnum(){
+  a=1
+  for i in $@; do
+    new=$(printf "%04d.jpg" "$a")
+    mv -- "$i" "$new"
+    let a=a+1
+  done
+}
+
+img_size_folder(){
+  mkdir $1
+  cp *.jpg $1
+  cd $1
+  mogrify -r $2 *.jpg
+  cd ..
+}
+
+create_image_sizes(){
+  mv_seqnum
+  img_size_folder big 1620
+  img_size_folder full 1920
+  img_size_folder medium 1024
+  img_size_folder small 450
+}
+
+
+thmbFld() {
+mkdir thmbnails
+for f in `find ./ .jpg`; 
+do   
+ smartresize $f 300 thmbnails;
+done
+}
+
+smrtRz() {
+   mogrify -path thumbnails -filter Triangle -define filter:support=2 -thumbnail 300 -unsharp 0.25x0.08+8.3+0.045 -dither None -posterize 136 -quality 82 -define jpeg:fancy-upsampling=off -define png:compression-filter=5 -define png:compression-level=9 -define png:compression-strategy=1 -define png:exclude-chunk=all -interlace none -colorspace sRGB $1
+}
+
+
+xrgthmb(){
+S=$1 
+F=$2
+mkdir $F;
+#mkdir thumbnails;
+find . -iname "*.jpg" -type f -print0 | xargs -P 8 -I {} ~/bin/smartresize.sh '{}' "$S" "$F" 
+}
+
+xthmb(){
+S=$1 
+F=$2
+mkdir $F;
+#mkdir thumbnails;
+find . -iname "*.jpg" -type f | parallel ~/bin/smartresize.sh {} $S $F 
+}
+
+#alias xargs="xargs -0"
 alias dir='ll'
 alias bar='pianobar'			    #"'To the Bar'"... echo "I'm Sick" (Spaghetti Incident Gs N'R* ) 
+alias vi="vim"				    # Preferred version of Vim
 alias cp='cp -iv'                           # Preferred 'cp' implementation
 alias mv='mv -iv'                           # Preferred 'mv' implementation
 #alias mkdir='mkdir -pv'                     # Preferred 'mkdir' implementation
@@ -85,7 +289,7 @@ trash () { command mv "$@" ~/.Trash ; }     # trash:        Moves a file to the 
 ql () { qlmanage -p "$*" >& /dev/null; }    # ql:           Opens any file in MacOS Quicklook Preview
 alias DT='tee ~/Desktop/terminalOut.txt'    # DT:           Pipe content to file on MacOS Desktop
 alias vmrun="/Applications/VMWare\ Fusion.app/Contents/Library/vmrun"
-alias VBoxManage="/Applications/VirtualBox.app/Contents/MacOS/VBoxManage""
+alias VBoxManage="/Applications/VirtualBox.app/Contents/MacOS/VBoxManage"
 
 #   lr:  Full Recursive Directory Listing
 #   ------------------------------------------
